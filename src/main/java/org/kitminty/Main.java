@@ -1,14 +1,10 @@
 package org.kitminty;
 
 import java.io.*;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.util.List;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-
+import com.tekgator.queryminecraftserver.api.Protocol;
+import com.tekgator.queryminecraftserver.api.QueryStatus;
+//cats are cool
 public class Main {
     public static void main(String[] args) {
         String serverjsonlist = "";
@@ -30,26 +26,26 @@ public class Main {
 
         List<Masscan> serverList = ServerJsonProcessor.parse(serverjsonlist);
         String outputTxt = outputtxt;
-        if (serverList == null) return;
         for (Masscan server : serverList) {
+            String json;
+            String address = server.ip();
+            short port = server.ports().getFirst().port();
             try {
-                String address = server.ip();
-                short port = server.ports().getFirst().port();
+                json = new QueryStatus.Builder(address)
+                        .setProtocol(Protocol.TCP)
+                        .build()
+                        .getStatus()
+                        .toJson();
 
-                HttpRequest request = HttpRequest.newBuilder().uri(URI.create("https://api.mcsrvstat.us/3/" + address)).build();
-                HttpResponse<String> response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
-                JsonObject jsonResponse = (JsonObject) new JsonParser().parse(response.body());
-                boolean ping = jsonResponse.get("debug").getAsJsonObject().get("ping").getAsBoolean();
+                System.out.println(ANSI_GREEN + "Server " + address + ":" + port + " Is On" + ANSI_RESET);
 
                 BufferedWriter out = new BufferedWriter(new FileWriter(outputTxt, true));
-                if (ping) {
-                    out.write("Server " + address + ":" + port + " Is On");
-                    out.newLine();
-                }
+                out.write("Server " + address + ":" + port + " Is On, Json: (" + json + ")");
+                out.newLine();
                 out.close();
-
-                System.out.println((ping ? ANSI_GREEN + "Server " + address + ":" + port + " Is On" : ANSI_RED + "Server " + address + ":" + port + " Is Off") + ANSI_RESET);
-            } catch (Exception ignored) { }
+            } catch (Exception ignored) {
+                System.out.println(ANSI_RED + "Server " + address + ":" + port + " Is Off" + ANSI_RESET);
+            }
         }
     }
 }
