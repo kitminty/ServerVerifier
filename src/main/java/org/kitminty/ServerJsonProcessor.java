@@ -2,11 +2,12 @@ package org.kitminty;
 
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
+import org.json.JSONArray;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,12 +24,33 @@ public class ServerJsonProcessor {
             .registerTypeAdapter(Port.class, (JsonDeserializer<Port>) (jsonElement, type, ctx) -> new Port(jsonElement.getAsJsonObject().get("port").getAsShort()))
             .create();
 
-    public static List<Masscan> parse(String path) {
-        try (BufferedReader reader = new BufferedReader(new FileReader(path))) {
-            Type serverList = new TypeToken<List<Masscan>>() {}.getType();
-            return GSON.fromJson(reader, serverList);
+    public static List<Masscan> parseonlyjson(String json) {
+        Type serverList = new TypeToken<List<Masscan>>() {}.getType();
+        return GSON.fromJson(json, serverList);
+    }
+
+    public static List<JSONArray> Chunklist(String address, int threadchunks) {
+        List<JSONArray> chunks = null;
+        try {
+            String content = new String(Files.readAllBytes(Paths.get(address)));
+            JSONArray jsonArray = new JSONArray(content);
+            chunks = splitArray(jsonArray, threadchunks);
         } catch (IOException e) {
-            throw new RuntimeException("cant find output file");
+            System.err.println("Error reading file: " + e.getMessage());
         }
+        return chunks;
+    }
+
+    public static List<JSONArray> splitArray(JSONArray array, int chunkSize) {
+        List<JSONArray> chunks = new ArrayList<>();
+        for (int i = 0; i < array.length(); i += chunkSize) {
+            int endIndex = Math.min(i + chunkSize, array.length());
+            JSONArray chunk = new JSONArray();
+            for (int j = i; j < endIndex; j++) {
+                chunk.put(array.get(j));
+            }
+            chunks.add(chunk);
+        }
+        return chunks;
     }
 }
