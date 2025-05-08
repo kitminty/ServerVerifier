@@ -2,8 +2,6 @@ package org.kitminty;
 
 //cats are cool
 
-/// find how masscan appends json to the output file
-
 public class Main {
     public static String serverjsonlist = "";
     public static String outputtxt = "";
@@ -11,7 +9,7 @@ public class Main {
     public static String ANSI_RED = "\u001B[31m";
     public static String ANSI_GREEN = "\u001B[32m";
 
-    public static int chunksize = 1;
+    public static int chunksize = 2700;
 
     public static void main(String[] args) {
         for (String arg : args) {
@@ -25,7 +23,7 @@ public class Main {
             }
         }
 
-        for (int i = 0; i < ServerJsonProcessor.Chunklist(serverjsonlist, Main.chunksize).size(); i++) {
+        for (int i = 0; i < ServerJsonProcessor.Chunking(serverjsonlist, Main.chunksize).size(); i++) {
             ServerScanner object = new ServerScanner();
             object.start();
         }

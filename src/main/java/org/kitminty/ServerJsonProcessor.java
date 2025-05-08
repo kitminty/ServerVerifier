@@ -29,27 +29,22 @@ public class ServerJsonProcessor {
         return GSON.fromJson(json, serverList);
     }
 
-    public static List<JSONArray> Chunklist(String address, int threadchunks) {
+    public static List<JSONArray> Chunking(String address, int threadchunks) {
         List<JSONArray> chunks = null;
         try {
             String content = new String(Files.readAllBytes(Paths.get(address)));
             JSONArray jsonArray = new JSONArray(content);
-            chunks = splitArray(jsonArray, threadchunks);
+            chunks = new ArrayList<>();
+            for (int i = 0; i < jsonArray.length(); i += threadchunks) {
+                int endIndex = Math.min(i + threadchunks, jsonArray.length());
+                JSONArray chunk = new JSONArray();
+                for (int j = i; j < endIndex; j++) {
+                    chunk.put(jsonArray.get(j));
+                }
+                chunks.add(chunk);
+            }
         } catch (IOException e) {
             System.err.println("Error reading file: " + e.getMessage());
-        }
-        return chunks;
-    }
-
-    public static List<JSONArray> splitArray(JSONArray array, int chunkSize) {
-        List<JSONArray> chunks = new ArrayList<>();
-        for (int i = 0; i < array.length(); i += chunkSize) {
-            int endIndex = Math.min(i + chunkSize, array.length());
-            JSONArray chunk = new JSONArray();
-            for (int j = i; j < endIndex; j++) {
-                chunk.put(array.get(j));
-            }
-            chunks.add(chunk);
         }
         return chunks;
     }

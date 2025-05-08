@@ -9,7 +9,7 @@ import java.util.List;
 
 public class ServerScanner extends Thread {
     public void run() {
-        List<Masscan> serverList = ServerJsonProcessor.parseonlyjson(ServerJsonProcessor.Chunklist(Main.serverjsonlist, Main.chunksize).get(Integer.parseInt(Thread.currentThread().getName().substring(7))).toString());
+        List<Masscan> serverList = ServerJsonProcessor.parseonlyjson(ServerJsonProcessor.Chunking(Main.serverjsonlist, Main.chunksize).get(Integer.parseInt(Thread.currentThread().getName().substring(7))).toString());
         for (Masscan server : serverList) {
             String json;
             String address = server.ip();
