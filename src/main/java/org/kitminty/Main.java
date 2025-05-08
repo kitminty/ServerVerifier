@@ -12,6 +12,7 @@ public class Main {
     public static int chunksize = 2700;
 
     public static void main(String[] args) {
+        /*
         for (String arg : args) {
             if (arg.startsWith("--serverjsonlist=")) {
                 serverjsonlist = arg.substring("--serverjsonlist=".length());
@@ -27,5 +28,6 @@ public class Main {
             ServerScanner object = new ServerScanner();
             object.start();
         }
+         */
     }
 }
