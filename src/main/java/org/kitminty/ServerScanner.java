@@ -21,13 +21,13 @@ public class ServerScanner extends Thread {
                         .getStatus()
                         .toJson();
 
-                System.out.println(Main.ANSI_GREEN + "Server " + address + ":" + port + " Is On" + Main.ANSI_RESET);
+                System.out.println("\u001B[32m" + "Server " + address + ":" + port + " Is On" + "\u001B[0m");
                 BufferedWriter out = new BufferedWriter(new FileWriter(Main.outputtxt, true));
                 out.write("Server " + address + ":" + port + " Is On, Json: (" + json + ")");
                 out.newLine();
                 out.close();
             } catch (Exception ignored) {
-                System.out.println(Main.ANSI_RED + "Server " + address + ":" + port + " Is Off" + Main.ANSI_RESET);
+                System.out.println("\u001B[31m" + "Server " + address + ":" + port + " Is Off" + "\u001B[0m");
             }
         }
     }
