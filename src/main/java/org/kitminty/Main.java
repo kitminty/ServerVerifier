@@ -5,8 +5,12 @@ package org.kitminty;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import com.mongodb.*;
+import com.mongodb.reactivestreams.client.*;
 import io.github.cdimascio.dotenv.Dotenv;
+import org.bson.Document;
 import org.slf4j.LoggerFactory;
+import reactor.core.publisher.Flux;
+import java.util.List;
 
 public class Main {
     public static boolean devmode = true;
@@ -36,9 +40,24 @@ public class Main {
             }
         }
 
+        VerifyServersOnSDB();
+        //ScanServerJson();
+    }
+
+    public static void ScanServerJson() {
         for (int i = 0; i < ServerJsonProcessor.Chunking(serverjsonlist, Main.chunksize).size(); i++) {
             ServerScanner object = new ServerScanner();
             object.start();
+        }
+    }
+
+    public static void VerifyServersOnSDB() {
+        try (MongoClient mongoClient = MongoClients.create(settings)) {
+            MongoDatabase database = mongoClient.getDatabase("Servers");
+            MongoCollection<Document> Serverlist = database.getCollection("Serverlist");
+
+            List<Masscan> DBserverList = ServerJsonProcessor.parseonlydbjson(String.valueOf(Flux.from(Serverlist.find()).map(Document::toJson).collectList().block()));
+            System.out.println(DBserverList);
         }
     }
 }

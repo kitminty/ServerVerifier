@@ -3,7 +3,6 @@ package org.kitminty;
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
 import org.json.JSONArray;
-
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.nio.file.Files;
@@ -23,10 +22,23 @@ public class ServerJsonProcessor {
             })
             .registerTypeAdapter(Port.class, (JsonDeserializer<Port>) (jsonElement, type, ctx) -> new Port(jsonElement.getAsJsonObject().get("port").getAsShort()))
             .create();
+    private static final Gson DBGSON = new GsonBuilder()
+            .registerTypeAdapter(Masscan.class, (JsonDeserializer<Masscan>) (jsonElement, type, ctx) -> {
+                JsonObject obj = jsonElement.getAsJsonObject();
+                String ip = obj.get("_id").getAsString();
+                return new Masscan(ip, null);
+            })
+            .registerTypeAdapter(Port.class, (JsonDeserializer<Port>) (jsonElement, type, ctx) -> new Port(jsonElement.getAsJsonObject().get("port").getAsShort()))
+            .create();
 
     public static List<Masscan> parseonlyjson(String json) {
         Type serverList = new TypeToken<List<Masscan>>() {}.getType();
         return GSON.fromJson(json, serverList);
+    }
+
+    public static List<Masscan> parseonlydbjson(String json) {
+        Type serverList = new TypeToken<List<Masscan>>() {}.getType();
+        return DBGSON.fromJson(json, serverList);
     }
 
     public static List<JSONArray> Chunking(String address, int threadchunks) {
