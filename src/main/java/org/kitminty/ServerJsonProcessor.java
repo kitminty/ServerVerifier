@@ -34,6 +34,18 @@ public class ServerJsonProcessor {
     public static List<Masscan> parseonlyjson(String json) {
         Type serverList = new TypeToken<List<Masscan>>() {}.getType();
         return GSON.fromJson(json, serverList);
+    } ///combine with Chunking()
+
+    public static List<Masscan> parsejsonfile(String address) {
+        JSONArray jsonArray = null;
+        Type serverList = new TypeToken<List<Masscan>>() {}.getType();
+        try {
+            String content = new String(Files.readAllBytes(Paths.get(address)));
+            jsonArray = new JSONArray(content);
+        } catch (IOException e) {
+            System.err.println("Error reading file: " + e.getMessage());
+        }
+        return GSON.fromJson(String.valueOf(jsonArray), serverList);
     }
 
     public static List<Masscan> parseonlydbjson(String json) {
@@ -57,6 +69,21 @@ public class ServerJsonProcessor {
             }
         } catch (IOException e) {
             System.err.println("Error reading file: " + e.getMessage());
+        }
+        return chunks;
+    }
+
+    public static List<JSONArray> DBChunking(String list, int threadchunks) {
+        List<JSONArray> chunks;
+        JSONArray jsonArray = new JSONArray(list);
+        chunks = new ArrayList<>();
+        for (int i = 0; i < jsonArray.length(); i += threadchunks) {
+            int endIndex = Math.min(i + threadchunks, jsonArray.length());
+            JSONArray chunk = new JSONArray();
+            for (int j = i; j < endIndex; j++) {
+                chunk.put(jsonArray.get(j));
+            }
+            chunks.add(chunk);
         }
         return chunks;
     }
